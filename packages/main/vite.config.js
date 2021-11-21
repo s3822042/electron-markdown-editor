@@ -1,46 +1,51 @@
-import {node} from '../../electron-vendors.config.json';
-import {join} from 'path';
-import {builtinModules} from 'module';
+import { node } from '../../electron-vendors.config.json'
+import { join } from 'path'
+import { builtinModules } from 'module'
 
-const PACKAGE_ROOT = __dirname;
+import { defineConfig } from 'vite'
+import { loadAndSetEnv } from '../../scripts/loadAndSetEnv.mjs'
 
+const PACKAGE_ROOT = __dirname
 
 /**
- * @type {import('vite').UserConfig}
+ * Vite looks for `.env.[mode]` files only in `PACKAGE_ROOT` directory.
+ * Therefore, you must manually load and set the environment variables from the root directory above
+ */
+loadAndSetEnv(process.env.MODE, process.cwd())
+
+/**
  * @see https://vitejs.dev/config/
  */
-const config = {
-  mode: process.env.MODE,
+export default defineConfig({
   root: PACKAGE_ROOT,
-  envDir: process.cwd(),
   resolve: {
     alias: {
-      '/@/': join(PACKAGE_ROOT, 'src') + '/',
-    },
+      '/@/': join(PACKAGE_ROOT, 'src') + '/'
+    }
   },
   build: {
     sourcemap: 'inline',
     target: `node${node}`,
     outDir: 'dist',
     assetsDir: '.',
-    minify: process.env.MODE !== 'development',
+    minify: process.env.MODE === 'development' ? false : 'terser',
+    terserOptions: {
+      ecma: 2020,
+      compress: {
+        passes: 2
+      },
+      safari10: false
+    },
     lib: {
       entry: 'src/index.ts',
-      formats: ['cjs'],
+      formats: ['cjs']
     },
     rollupOptions: {
-      external: [
-        'electron',
-        'electron-devtools-installer',
-        ...builtinModules,
-      ],
+      external: ['electron', 'electron-devtools-installer', ...builtinModules],
       output: {
-        entryFileNames: '[name].cjs',
-      },
+        entryFileNames: '[name].cjs'
+      }
     },
-    emptyOutDir: true,
-    brotliSize: false,
-  },
-};
-
-export default config;
+    emptyOutDir: true
+  }
+})

@@ -54,3 +54,10 @@ thumbs.db
 # Editor-based Rest Client
 .idea/httpRequests
 /.idea/csv-plugin.xml
+
+# yarn
+yarn.lock
+yarn-error.log
+
+# development
+.idea
